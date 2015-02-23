@@ -30,7 +30,6 @@ import Data.Coerce (coerce)
 import Data.IORef
 import Data.Maybe
 import Data.String (IsString(..))
-import Ohm.Internal.DOMEvent
 import GHCJS.DOM
 import GHCJS.DOM.Document
 import GHCJS.DOM.Element
@@ -233,19 +232,27 @@ foreign import javascript safe
 foreign import javascript safe
   "$1.stub" getStubValue :: JSRef a -> JSString
 
-onClick :: MonadState HTML m => DOMEvent () -> m ()
-onClick = modify . (setDOMEvent vnodeSetClickEv $ void . preventDefault)
+onClick :: MonadState HTML m => IO () -> m ()
+onClick io =
+  modify $ setDOMEventHandler vnodeSetClickEv (void . preventDefault) (const io)
 
-onChange :: MonadState HTML m => DOMEvent () -> m ()
-onChange = modify . (setDOMEvent vnodeSetChangeEv $ void . preventDefault)
+onChange :: MonadState HTML m => IO () -> m ()
+onChange io =
+  modify $ setDOMEventHandler vnodeSetChangeEv (void . preventDefault) (const io)
 
-onInput :: MonadState HTML m => DOMEvent String -> m ()
-onInput = modify . (setDOMEvent vnodeSetInputEv $ return . fromJSString . getStubValue)
+onInput :: MonadState HTML m => (String -> IO ()) -> m ()
+onInput kio =
+  modify $ setDOMEventHandler vnodeSetInputEv (return . fromJSString . getStubValue) kio
 
-setDOMEvent :: (HTML -> JSFun (JSRef event -> IO ()) -> HTML) -> (JSRef event -> IO a) -> DOMEvent a -> HTML -> HTML
-setDOMEvent setter f (DOMEvent chan) n
+setDOMEventHandler
+  :: (HTML -> JSFun (JSRef event -> IO ()) -> HTML)
+  -> (JSRef event -> IO a)
+  -> (a -> IO ())
+  -> HTML
+  -> HTML
+setDOMEventHandler setter f kio n
   | fromJSBool (isVNode n) = setter n $ unsafePerformIO $
-      syncCallback1 AlwaysRetain True (f >=> chan)
+      syncCallback1 AlwaysRetain True (f >=> kio)
   | otherwise = n
 
 

@@ -15,13 +15,12 @@ cabal-version:       >=1.10
 
 Library
   exposed-modules:
-       Ohm.Component
-     , Ohm.HTML
-     , Ohm.SocketIO
-     , Ohm.XHRIO
-     , Ohm.Internal.HTML
-     , Ohm.Internal.DOMEvent
-     , Ohm.Internal.Immutable
+        Ohm
+      , Ohm.HTML
+      , Ohm.SocketIO
+      , Ohm.XHRIO
+      , Ohm.Internal.HTML
+      , Ohm.Internal.Immutable
   -- other-modules:
   other-extensions:    ForeignFunctionInterface, GeneralizedNewtypeDeriving, OverloadedStrings
   build-depends:       base >=4.7 && <4.8
@@ -32,9 +31,9 @@ Library
                      , ghcjs-base >= 0.1
                      , ghcjs-dom >=0.1.1.1
                      , ghcjs-prim >= 0.1.0.0
+                     , lei >=0.0 && <0.1
                      , lens >= 4.6.0.1
                      , mtl >= 2.2.1
-                     , mvc >= 1.0.1
                      , pipes >= 4.0
                      , pipes-concurrency >= 2.0
                      , profunctors >= 4.3.2

@@ -4,7 +4,7 @@ with import <nixpkgs> {};
 let haskellPackages = pkgs.haskellPackages_ghcjs.override {
       extension = self: super: {
         oHm = self.callPackage ./. {};
-        mvc = self.callPackage ./mvc.nix {};
+        lei = self.callPackage ./lei {};
       };
     };
 
@@ -14,6 +14,6 @@ in pkgs.callPackage ./. {
          buildTools = super.buildTools ++ [ haskellPackages.ghc.ghc.parent.cabalInstall ];
        };
      };
-     inherit (haskellPackages) aeson ghcjsBase ghcjsDom ghcjsPrim lens mvc pipes
-                               pipesConcurrency profunctors stm time;
+     inherit (haskellPackages) aeson ghcjsBase ghcjsDom ghcjsPrim lens pipes
+                               pipesConcurrency profunctors stm time lei;
    }
