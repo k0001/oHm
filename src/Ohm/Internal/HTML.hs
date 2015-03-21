@@ -31,8 +31,8 @@ import Data.IORef
 import Data.Maybe
 import Data.String (IsString(..))
 import GHCJS.DOM
-import GHCJS.DOM.Document
-import GHCJS.DOM.Element
+import GHCJS.DOM.Document hiding (createElement)
+import qualified GHCJS.DOM.Element
 import GHCJS.DOM.Node
 import GHCJS.Foreign
 import GHCJS.Types
@@ -259,7 +259,7 @@ setDOMEventHandler setter f kio n
 --------------------------------------------------------------------------------
 foreign import javascript unsafe
   "vdom($1)"
-  createElement :: HTML -> IO Element
+  createElement :: HTML -> IO GHCJS.DOM.Element.Element
 
 data Diff
 foreign import javascript unsafe
@@ -268,11 +268,11 @@ foreign import javascript unsafe
 
 foreign import javascript unsafe
   "window.virtualDom.patch($1, $2)"
-  patch :: Element -> JSRef Diff -> IO ()
+  patch :: GHCJS.DOM.Element.Element -> JSRef Diff -> IO ()
 
 --------------------------------------------------------------------------------
 -- An element in the DOM that we can render virtualdom elements to
-data VNodePresentation = VNodePresentation (IORef HTML) Element
+data VNodePresentation = VNodePresentation (IORef HTML) GHCJS.DOM.Element.Element
 
 -- Render our internal HTML tree representation into a VNode. We first
 -- convert our HTML into a VTree, and then diff this against the container
@@ -284,12 +284,13 @@ renderTo (VNodePresentation ioref el) !e = do
   patch el patches
   writeIORef ioref e
 
-newTopLevelContainer :: IO VNodePresentation
-newTopLevelContainer = do
-  initialVNode <- return div
-  currentVNode <- newIORef initialVNode
-  el <- createElement initialVNode
-  Just doc <- currentDocument
-  Just bodyNode <- documentGetBody doc
-  _ <- nodeAppendChild bodyNode (Just el)
-  return (VNodePresentation currentVNode el)
+newTopLevelContainer
+  :: Document
+  -> IO (GHCJS.DOM.Node.Node, VNodePresentation)
+  -- ^ TODO: Do not expose internals here.
+newTopLevelContainer doc = do
+  Just body <- GHCJS.DOM.Document.getBody doc
+  currentVNode <- newIORef div
+  el <- createElement div
+  _ <- GHCJS.DOM.Node.appendChild body (Just el)
+  return (GHCJS.DOM.Node.toNode el, VNodePresentation currentVNode el)

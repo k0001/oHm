@@ -1,4 +1,4 @@
-{ cabal, aeson, ghcjsBase, ghcjsDom, ghcjsPrim, lens, pipes
+{ cabal, aeson, ghcjsBase, ghcjsDom, ghcjsPrim, mmorph, lens, pipes
 , pipesConcurrency, profunctors, stm, time, lei
 }:
 
@@ -7,7 +7,7 @@ cabal.mkDerivation (self: {
   version = "0.1.0.0";
   src = ./.;
   buildDepends = [
-    aeson ghcjsBase ghcjsDom ghcjsPrim lens pipes pipesConcurrency
+    aeson ghcjsBase ghcjsDom ghcjsPrim mmorph lens pipes pipesConcurrency
     profunctors stm time lei
   ];
   meta = {

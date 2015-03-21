@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE InterruptibleFFI #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -17,7 +18,11 @@ import Data.List.Split
 import Control.Applicative
 import Data.Foldable (for_)
 import GHCJS.Foreign
+import GHCJS.Marshal
+import GHCJS.Marshal.Pure
 import GHCJS.Types
+import qualified GHCJS.DOM
+import GHC.Generics (Generic)
 
 data Request = Request
   { rqWithCredentials :: Bool
@@ -28,18 +33,19 @@ data Request = Request
   }
 
 mkRequest :: (ToJSON a) => Method -> String -> a -> Request
-mkRequest meth url a = Request 
+mkRequest meth url a = Request
   { rqWithCredentials = False
   , rqURL = url
   , rqMethod = meth
   , rqHeaders = []
   , rqPayload = Just (toJSString . C8.unpack . BSL.toStrict $ Aeson.encode a)
-  } 
-    
-data Method = GET | POST | DELETE | PUT deriving (Eq, Show)
+  }
 
-instance ToJSString Method where
-  toJSString = toJSString . show
+data Method = GET | POST | DELETE | PUT deriving (Eq, Show, Generic)
+
+instance PToJSRef Method where ptoJSRef = castRef . ptoJSRef . show
+instance ToJSRef Method
+instance ToJSString Method
 
 data Response = Response { resStatus :: Int
                          , resHeaders :: [(String, String)]
@@ -105,7 +111,7 @@ _JSON :: (ToJSON a, FromJSON a) => Prism' JSString a
 _JSON = prism' encode' decode'
   where encode' = toJSString . C8.unpack . BSL.toStrict . Aeson.encode
         decode' = Aeson.decode . BSL.fromStrict . C8.pack . fromJSString
-        
+
 --------------------------------------------------------------------------------
 ajax :: (ToJSON a, FromJSON b) => Method -> String -> a -> Output b -> IO ()
 ajax meth url payload output = do
