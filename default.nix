@@ -1,5 +1,5 @@
 { cabal, aeson, ghcjsBase, ghcjsDom, ghcjsPrim, mmorph, lens, pipes
-, pipesConcurrency, profunctors, stm, time, lei
+, pipesConcurrency, profunctors, stm, time, lei, text
 }:
 
 cabal.mkDerivation (self: {
@@ -8,7 +8,7 @@ cabal.mkDerivation (self: {
   src = ./.;
   buildDepends = [
     aeson ghcjsBase ghcjsDom ghcjsPrim mmorph lens pipes pipesConcurrency
-    profunctors stm time lei
+    profunctors stm time lei text
   ];
   meta = {
     license = self.stdenv.lib.licenses.bsd3;

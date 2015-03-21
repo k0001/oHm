@@ -19,5 +19,5 @@ in pkgs.callPackage ./. {
      };
      inherit (haskellPackages) aeson ghcjsBase ghcjsDom ghcjsPrim mmorph
                                lens pipes pipesConcurrency profunctors stm time
-                               lei;
+                               lei text;
    }

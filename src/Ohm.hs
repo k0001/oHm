@@ -10,6 +10,7 @@
 
 module Ohm
   ( run
+  , getRelativeURL
   ) where
 
 import           Control.Applicative (Applicative(pure, (<*>)), (<$>), (<*))
@@ -21,6 +22,7 @@ import           Control.Monad.Trans.Class (MonadTrans(lift))
 import qualified Control.Monad.State as State
 import qualified Data.Aeson as Ae
 import           Data.Monoid (Monoid, mempty, mconcat)
+import           Data.Text (Text)
 import qualified Lei as Lei
 import qualified GHCJS.DOM as DOM
 import qualified GHCJS.DOM.DOMWindow as DOMWindow
@@ -33,7 +35,6 @@ import           GHCJS.Foreign (FromJSString, ToJSString(toJSString))
 import           GHCJS.Marshal (fromJSRef, ToJSRef(toJSRef))
 import           GHCJS.Types (JSString)
 import qualified Ohm.HTML as HTML
-
 
 --------------------------------------------------------------------------------
 
@@ -153,9 +154,7 @@ run bracket mon s0 cr avw toRelURL win = do
 --------------------------------------------------------------------------------
 -- Internal tools
 
--- | Get relative URL, including path, query-string and hash.
--- getRelativeURL
---   :: (MonadIO m, FromJSString a, Monoid a)
---   => DOMLocation.Location -> m a
--- getRelativeURL loc = liftM mconcat $ mapM (\f -> maybe mempty id `liftM` f loc)
---     [DOMLocation.getPathname, DOMLocation.getSearch, DOMLocation.getHash]
+-- | Get relative URL, including path with leading @'/'@, query-string and hash.
+getRelativeURL :: MonadIO m => DOMLocation.Location -> m Text
+getRelativeURL loc = liftM mconcat $ mapM ($ loc)
+    [DOMLocation.getPathname, DOMLocation.getSearch, DOMLocation.getHash]
